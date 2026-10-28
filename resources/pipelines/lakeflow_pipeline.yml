@@ -1,0 +1,4 @@
+# Pendiente: reemplazar por la definicion exportada desde Databricks
+# (Pipeline > menu ... > View as code / YAML).
+# Diseno: catalogo workspace, esquema taco_bueno_pipeline, serverless,
+# codigo fuente en src/transformations (bronze, silver, gold), configuracion raw_path.
