@@ -1,0 +1,33 @@
+# st_bronze_ventas: capa bronze (crudo) como streaming table con Auto Loader.
+# Lee todos los CSV del POS de Taco Bueno, procesa solo archivos nuevos en cada corrida
+# y adapta el esquema a los 3 formatos de columnas (19, 21 y 22 columnas).
+import re
+import dlt
+from pyspark.sql import functions as F
+
+RAW_PATH = spark.conf.get("raw_path", "/Volumes/workspace/taco_bueno/raw/")
+
+
+def to_snake(c):
+    # "Store #" -> "store", "Menu Item" -> "menu_item"; quita el BOM del primer encabezado
+    c = c.replace("﻿", "").replace("#", "").strip().lower()
+    return re.sub(r"[^a-z0-9]+", "_", c).strip("_")
+
+
+@dlt.table(
+    name="st_bronze_ventas",
+    comment="Lineas de venta del POS tal como llegan (todo texto), con archivo de origen para trazabilidad.",
+    table_properties={"quality": "bronze"},
+)
+def st_bronze_ventas():
+    df = (
+        spark.readStream.format("cloudFiles")
+        .option("cloudFiles.format", "csv")
+        .option("header", "true")
+        .option("cloudFiles.inferColumnTypes", "false")              # todo como texto; los tipos se corrigen en silver
+        .option("cloudFiles.schemaEvolutionMode", "addNewColumns")   # columnas nuevas (Report Group, Tender Type, Total Rounding)
+        .load(RAW_PATH)
+        .select("*", F.col("_metadata.file_path").alias("source_file"))
+    )
+    df = df.toDF(*[to_snake(c) for c in df.columns])
+    return df.withColumn("ingested_at", F.current_timestamp())
