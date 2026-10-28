@@ -53,6 +53,7 @@ Streaming tables con Auto Loader, materialized views, liquid clustering, expecta
 Ver [docs/runbook.md](docs/runbook.md).
 
 ## Equipo Beta 0
-Berenice Del Angel De La Cruz (lider) · Ana Paola Mejia Rodriguez · Sherlyn Castano Garcia · Thania Yu Ting Chen Kuang
-
-Nota: los datos de Sun Holdings son confidenciales; este repositorio solo contiene codigo y documentacion.
+Berenice Del Angel De La Cruz
+Ana Paola Mejia Rodriguez
+Sherlyn Castano Garcia
+Thania Yu Ting Chen Kuang
