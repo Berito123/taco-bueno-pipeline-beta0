@@ -14,4 +14,8 @@ Pendiente (Thania): completar una fila por tabla.
 | mv_gold_promo_daily | Materialized view | Gold | 1 promocion en 1 dia | | | |
 | ref_promo_calendar | Materialized view | Gold (referencia) | 1 promocion publica | | | |
 | mv_gold_promo_performance | Materialized view | Gold | 1 promocion | | | |
+| mv_gold_weekly | Materialized view | Gold | 1 semana | week_start | Tendencia de trafico, ticket promedio y uso de promociones | Dashboard |
+| mv_gold_line_mix | Materialized view | Gold | 1 mes x 1 tipo de linea | month, line_type | Composicion de las lineas del POS | Dashboard |
+| mv_gold_item_pricing | Materialized view | Gold | 1 producto en 1 mes | menu_item, month | Precio de lista vs precio pagado y elasticidad | Analisis de precios |
+| mv_gold_store_leakage | Materialized view | Gold | 1 tienda | store | Perdidas por anulaciones y articulos regalados | Operaciones |
 | dq_results | Tabla Delta | Calidad | 1 check en 1 corrida | | | |
