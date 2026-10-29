@@ -36,6 +36,13 @@ check("ticket_id_unique", "Unicidad", "Tickets duplicados en mv_silver_tickets",
       f"SELECT COUNT(*) - COUNT(DISTINCT ticket_id) FROM {T('mv_silver_tickets')}",
       lambda v: v == 0)
 
+# Unicidad: una tienda y fecha no debe venir de mas de un archivo (mismo CSV subido con otro nombre)
+check("duplicate_store_date_files", "Unicidad", "Combinaciones tienda-fecha cargadas desde mas de un archivo",
+      f"""SELECT COUNT(*) FROM (
+            SELECT store, sale_date FROM {T('st_silver_ventas')}
+            GROUP BY store, sale_date HAVING COUNT(DISTINCT source_file) > 1)""",
+      lambda v: v == 0, critical=False)
+
 # Validez: fechas dentro del periodo del dataset
 check("sale_date_in_range", "Validez", "Lineas con fecha fuera de rango",
       f"SELECT COUNT(*) FROM {T('st_silver_ventas')} WHERE sale_date < DATE'2025-01-01' OR sale_date > current_date()",
