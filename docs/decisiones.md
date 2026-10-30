@@ -1,16 +1,16 @@
-# Decisiones de diseno y su razon
+# Design decisions and their reasons
 
-Cada decision explica que se hizo y por que, para poder defenderla.
+Each decision explains what was done and why, so it can be defended.
 
-1. **Bronze con Auto Loader y todo como texto.** Los archivos llegan en 3 formatos y a veces con columnas nuevas. Si se guardaran con tipos desde el inicio, un archivo inesperado romperia la carga. Como texto se guarda todo sin perder nada y la limpieza se hace en silver. Tambien se guarda el archivo de origen (`source_file`) para rastrear cada dato.
-2. **Auto Loader en lugar de releer todo.** Solo procesa archivos nuevos. Si se vuelve a subir el mismo archivo con el mismo nombre, no se duplica.
-3. **Unir los 3 formatos por nombre de columna.** El orden de las columnas cambia entre formatos, pero los nombres no. Unir por nombre evita mezclar datos.
-4. **Identificador de ticket (tienda + fecha + numero de ticket).** El sistema no trae una llave unica y el numero de ticket se repite entre tiendas y dias. Sin un identificador propio no se pueden contar tickets ni calcular el ticket promedio.
-5. **Monto por linea segun su tipo.** Las promociones aparecen como lineas con precio negativo y los modificadores o componentes de combo con precio cero. Si todas las lineas se sumaran igual, las ventas saldrian mal. Por eso cada linea se clasifica (`line_type`) y su monto (`line_amount`) depende de ese tipo.
-6. **No usar la columna Total del punto de venta para medir ventas.** Su significado cambia entre periodos (con y sin impuesto), asi que compararla entre fechas seria enganoso. Las ventas se calculan con `line_amount`.
-7. **Expectations con distinta severidad.** Una falla detiene el pipeline (falta la llave del ticket, porque sin ella no se puede seguir), una descarta filas (fecha invalida) y cuatro solo registran, para ver el problema sin perder datos.
-8. **Gold como materialized views.** Son tablas ya calculadas para negocio y se actualizan de forma incremental cuando es posible, asi que el dashboard lee tablas pequenas y rapidas.
-9. **Job con dos tareas dependientes.** Primero el pipeline y, solo si termina bien, la revision de calidad. Si algo falla, el Job queda en rojo y llega un correo.
-10. **Trigger por llegada de archivo.** Llega un archivo por dia, asi que el Job corre solo cuando hay datos nuevos, sin depender de un horario fijo.
-11. **Una ejecucion a la vez.** Evita que dos corridas se pisen si llegan varios archivos juntos.
-12. **Comparacion descriptiva de promociones.** `mv_gold_promo_performance` compara cada promocion contra las 4 semanas previas y posteriores. No separa el efecto de la promocion del de la temporada, y por eso el siguiente paso es estimar el efecto real.
+1. **Bronze with Auto Loader and everything as text.** Files arrive in 3 formats and sometimes with new columns. If they were stored with types from the start, an unexpected file would break the load. Stored as text, nothing is lost and the cleaning happens in silver. The source file (`source_file`) is also stored, to trace every piece of data.
+2. **Auto Loader instead of rereading everything.** It processes only new files. If the same file is uploaded again with the same name, it is not duplicated.
+3. **Join the 3 formats by column name.** The column order changes between formats, but the names do not. Joining by name avoids mixing up data.
+4. **Ticket identifier (store + date + ticket number).** The system has no unique key, and the ticket number repeats across stores and days. Without our own identifier, tickets cannot be counted and the average ticket cannot be calculated.
+5. **Amount per line according to its type.** Promotions appear as lines with a negative price, and modifiers or combo components with a price of zero. If all lines were added the same way, sales would come out wrong. That is why each line is classified (`line_type`) and its amount (`line_amount`) depends on that type.
+6. **Do not use the POS Total column to measure sales.** Its meaning changes between periods (with and without tax), so comparing it across dates would be misleading. Sales are calculated with `line_amount`.
+7. **Expectations with different severity.** One failure stops the pipeline (the ticket key is missing, because without it the process cannot continue), one drops rows (invalid date), and four only log, so the problem is visible without losing data.
+8. **Gold as materialized views.** They are precomputed tables for the business and refresh incrementally when possible, so the dashboard reads small, fast tables.
+9. **Job with two dependent tasks.** First the pipeline and, only if it finishes successfully, the quality check. If something fails, the Job turns red and an email is sent.
+10. **File-arrival trigger.** One file arrives per day, so the Job runs only when there is new data, without depending on a fixed schedule.
+11. **One run at a time.** It prevents two runs from overlapping if several files arrive together.
+12. **Descriptive comparison of promotions.** `mv_gold_promo_performance` compares each promotion against the 4 weeks before and after. It does not separate the effect of the promotion from the effect of the season, which is why the next step is to estimate the real effect.

@@ -1,27 +1,27 @@
 # Runbook
 
-Guia de operacion del Job `daily_orchestration_job`: como corre, que hacer si algo falla y como volver a ejecutarlo.
+Operations guide for the `daily_orchestration_job` Job: how it runs, what to do if something fails, and how to run it again.
 
-## Como se ejecuta
-- El Job tiene dos tareas:
-  1. `run_pipeline`: ejecuta el pipeline Lakeflow `taco_bueno_pipeline` (bronze, silver y gold).
-  2. `quality_checks`: ejecuta `notebooks/04_quality_checks`. Solo corre si la tarea 1 termino bien.
-- Disparador: llegada de archivo. El Job corre solo cuando aparece un archivo nuevo en el Volume `/Volumes/workspace/taco_bueno/raw/`. Llega un CSV por dia, asi que no hay horario fijo.
-- Solo se permite una ejecucion a la vez (maximo de corridas simultaneas = 1), para que dos corridas no se pisen si llegan varios archivos juntos.
-- Reintentos: la tarea 1 se reintenta una vez con 5 minutos de espera. La tarea 2 no se reintenta, porque si un check critico falla, repetirlo no lo arregla.
-- Aviso: si falla la tarea del pipeline se envia un correo a la persona responsable.
+## How it runs
+- The Job has two tasks:
+  1. `run_pipeline`: runs the Lakeflow pipeline `taco_bueno_pipeline` (bronze, silver, and gold).
+  2. `quality_checks`: runs `notebooks/04_quality_checks`. It only runs if task 1 finished successfully.
+- Trigger: file arrival. The Job runs only when a new file appears in the Volume `/Volumes/workspace/taco_bueno/raw/`. One CSV arrives per day, so there is no fixed schedule.
+- Only one run is allowed at a time (maximum concurrent runs = 1), so two runs do not overlap if several files arrive together.
+- Retries: task 1 is retried once after a 5-minute wait. Task 2 is not retried, because if a critical check fails, repeating it does not fix it.
+- Alerts: if the pipeline task fails, an email is sent to the person in charge.
 
-## Si algo falla
-| Donde falla | Que significa | Que hacer |
+## If something fails
+| Where it fails | What it means | What to do |
 |---|---|---|
-| Tarea 1 (pipeline) | El pipeline no termino: error de codigo, archivo con formato inesperado o una expectation que detiene la carga. La tarea 2 no corre. | Abrir Jobs & Pipelines > Runs, entrar a la corrida en rojo y leer el mensaje de error. Corregir la causa y volver a ejecutar con Run now. |
-| Expectation `ticket_key_not_null` | Llego una linea sin tienda o sin numero de ticket. El pipeline se detiene a proposito, porque sin esa llave no se puede identificar el ticket. | Buscar el archivo de origen con la columna `source_file` de `st_bronze_ventas`, revisarlo o corregirlo en origen y volver a ejecutar. |
-| Tarea 2 (checks) | Un check critico no paso y el Job termina en rojo. | Consultar la tabla `dq_results` (ultima corrida por `run_ts`) para ver que check fallo, corregir la causa y volver a ejecutar. Los checks no criticos solo quedan registrados y no detienen el Job. |
+| Task 1 (pipeline) | The pipeline did not finish: a code error, a file with an unexpected format, or an expectation that stops the load. Task 2 does not run. | Open Jobs & Pipelines > Runs, open the red run, and read the error message. Fix the cause and run again with Run now. |
+| Expectation `ticket_key_not_null` | A line arrived without a store or a ticket number. The pipeline stops on purpose, because without that key the ticket cannot be identified. | Find the source file with the `source_file` column of `st_bronze_ventas`, review or fix it at the source, and run again. |
+| Task 2 (checks) | A critical check did not pass and the Job ends in red. | Query the `dq_results` table (latest run by `run_ts`) to see which check failed, fix the cause, and run again. Non-critical checks are only logged and do not stop the Job. |
 
-## Como re-ejecutar
-- Refresh normal (Run now): procesa solo los archivos nuevos. Es lo que se usa casi siempre.
-- Full refresh del pipeline: reprocesa todo desde cero. Usarlo solo si cambia la logica de bronze o silver.
-- Si se vuelve a subir un archivo con el mismo nombre, Auto Loader no lo procesa dos veces. Si se sube el mismo contenido con otro nombre, el check `duplicate_store_date_files` lo detecta.
+## How to run it again
+- Normal refresh (Run now): processes only the new files. This is what is used almost every time.
+- Full refresh of the pipeline: reprocesses everything from scratch. Use it only if the bronze or silver logic changes.
+- If a file with the same name is uploaded again, Auto Loader does not process it twice. If the same content is uploaded under a different name, the `duplicate_store_date_files` check detects it.
 
-## Contacto
-Berenice Del Angel De La Cruz, responsable tecnica del pipeline.
+## Contact
+Berenice Del Angel De La Cruz, technical owner of the pipeline.
