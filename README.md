@@ -6,8 +6,7 @@ Sun Holdings x Databricks x Tec de Monterrey Data Challenge 2026 — Challenge 2
 Answer which Taco Bueno promotions should be kept, removed, or relaunched. To do that, the pipeline turns point-of-sale (POS) files into reliable tables that are ready to analyze sales, tickets, prices, and promotions.
 
 ## Architecture
-![Architecture](docs/arquitectura.png)
-
+<img width="1056" height="495" alt="image" src="https://github.com/user-attachments/assets/29aca5cc-65c7-44f7-a5a7-349cce56fb16" />
 ```
 POS CSV (Volume)  ->  st_bronze_ventas  ->  st_silver_ventas  ->  mv_silver_tickets  ->  mv_gold_*  ->  Dashboard / Genie
                       (Auto Loader)        (expectations,        (1 row per ticket)     (business
