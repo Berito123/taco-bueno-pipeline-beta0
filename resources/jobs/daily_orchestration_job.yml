@@ -1,4 +1,47 @@
-# Pendiente: reemplazar por la definicion exportada desde Databricks
-# (Job > menu ... > View as code / YAML).
-# Diseno: tarea 1 = pipeline Lakeflow taco_bueno_pipeline; tarea 2 = notebooks/04_quality_checks (depende de la 1).
-# Reintentos por tarea, notificacion por correo si falla y schedule diario.
+resources:
+  jobs:
+    daily_orchestration_job:
+      name: daily_orchestration_job
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/workspace/taco_bueno/raw/
+      tasks:
+        - task_key: run_pipeline
+          pipeline_task:
+            pipeline_id: 64290fdb-c48c-4b0d-aac2-e0dfe65cec9a
+          max_retries: 1
+          min_retry_interval_millis: 300000
+          timeout_seconds: 3600
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 1800
+          email_notifications:
+            on_failure:
+              - A01787111@tec.mx
+            on_duration_warning_threshold_exceeded:
+              - A01787111@tec.mx
+          notification_settings:
+            alert_on_last_attempt: true
+        - task_key: quality_checks
+          depends_on:
+            - task_key: run_pipeline
+          notebook_task:
+            notebook_path: /Workspace/Users/a01787111@tec.mx/taco-bueno-pipeline-beta0/notebooks/04_quality_checks
+            base_parameters:
+              catalog: workspace
+              schema: taco_bueno_pipeline
+            source: WORKSPACE
+          min_retry_interval_millis: 900000
+          disable_auto_optimization: true
+          environment_key: Default
+      queue:
+        enabled: true
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "6"
+      performance_target: PERFORMANCE_OPTIMIZED
+
