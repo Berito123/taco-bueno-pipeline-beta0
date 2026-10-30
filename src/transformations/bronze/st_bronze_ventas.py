@@ -1,6 +1,4 @@
-# st_bronze_ventas: capa bronze (crudo) como streaming table con Auto Loader.
-# Lee todos los CSV del POS de Taco Bueno, procesa solo archivos nuevos en cada corrida
-# y adapta el esquema a los 3 formatos de columnas (19, 21 y 22 columnas).
+
 import re
 import dlt
 from pyspark.sql import functions as F
