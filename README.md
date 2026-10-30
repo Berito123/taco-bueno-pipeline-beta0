@@ -7,12 +7,6 @@ Answer which Taco Bueno promotions should be kept, removed, or relaunched. To do
 
 ## Architecture
 <img width="1056" height="495" alt="image" src="https://github.com/user-attachments/assets/29aca5cc-65c7-44f7-a5a7-349cce56fb16" />
-```
-POS CSV (Volume)  ->  st_bronze_ventas  ->  st_silver_ventas  ->  mv_silver_tickets  ->  mv_gold_*  ->  Dashboard / Genie
-                      (Auto Loader)        (expectations,        (1 row per ticket)     (business
-                                            liquid clustering)                           metrics)
-Orchestration: daily_orchestration_job  =  [1] Lakeflow pipeline  ->  [2] notebooks/04_quality_checks
-```
 
 ## Repository structure
 ```
