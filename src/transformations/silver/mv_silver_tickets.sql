@@ -1,8 +1,8 @@
--- mv_silver_tickets: una fila por ticket. Base de las tablas gold.
--- Ventas = suma de line_amount (no se usa la columna total del POS porque cambio de significado entre dic 2025 y ene 2026).
+-- mv_silver_tickets: one row per ticket. Basis of the gold tables.
+-- Sales = sum of line_amount (the POS total column is not used because its meaning changed between Dec 2025 and Jan 2026).
 CREATE OR REFRESH MATERIALIZED VIEW mv_silver_tickets
 CLUSTER BY (sale_date, store)
-COMMENT 'Un ticket por fila: ventas netas, ventas brutas, monto de promociones, unidades y banderas.'
+COMMENT 'One ticket per row: net sales, gross sales, promotion amount, units and flags.'
 AS
 SELECT
   ticket_id,

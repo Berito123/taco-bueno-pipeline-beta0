@@ -1,5 +1,5 @@
-# st_silver_ventas: capa silver (limpia) como streaming table con expectations y liquid clustering.
-# Una fila = una linea de producto dentro de un ticket.
+# st_silver_ventas: silver (clean) layer as a streaming table with expectations and liquid clustering.
+# One row = one product line within a ticket.
 import dlt
 from pyspark.sql import functions as F
 
@@ -15,14 +15,14 @@ def num(c):
 
 @dlt.table(
     name="st_silver_ventas",
-    comment="Lineas de venta limpias: tipos correctos, ticket_id unico, clasificacion de linea y monto de venta.",
+    comment="Clean sales lines: correct types, unique ticket_id, line classification and sales amount.",
     table_properties={"quality": "silver"},
-    cluster_by=["sale_date", "store"],  # liquid clustering: las consultas filtran por fecha y tienda
+    cluster_by=["sale_date", "store"],  # liquid clustering: queries filter by date and store
 )
-# Expectations (3 niveles de accion)
-@dlt.expect_or_fail("ticket_key_not_null", "store IS NOT NULL AND check_number IS NOT NULL")       # detiene la carga
-@dlt.expect_or_drop("valid_sale_date", "sale_date IS NOT NULL")                                     # descarta la fila
-@dlt.expect("date_in_range", "sale_date BETWEEN '2025-01-01' AND current_date()")                  # solo registra
+# Expectations (3 action levels)
+@dlt.expect_or_fail("ticket_key_not_null", "store IS NOT NULL AND check_number IS NOT NULL")       # stops the load
+@dlt.expect_or_drop("valid_sale_date", "sale_date IS NOT NULL")                                     # drops the row
+@dlt.expect("date_in_range", "sale_date BETWEEN '2025-01-01' AND current_date()")                  # only logs
 @dlt.expect("price_is_numeric", "menu_price IS NOT NULL")
 @dlt.expect("quantity_is_valid", "quantity IS NOT NULL AND quantity >= 0")
 @dlt.expect("known_transaction_type", "transaction_type IN ('Regular Sale', 'Discount', 'Void')")
@@ -57,7 +57,7 @@ def st_silver_ventas():
         F.col("source_file"),
         F.col("ingested_at"),
     )
-    # order_voided se elimina: en Fase 1 vimos que vale 0 en todas las filas.
+    # order_voided is dropped: it is 0 in every row.
 
     df = df.withColumn("ticket_id", F.concat_ws("_", "store", F.col("sale_date").cast("string"), "check_number"))
     df = df.withColumn(
@@ -67,8 +67,8 @@ def st_silver_ventas():
     df = df.withColumn(
         "line_type",
         F.when(F.col("is_voided"), "voided")
-        .when(F.col("menu_price") < 0, "promotion")            # promos = lineas con precio negativo
-        .when(F.col("menu_price") == 0, "modifier_or_combo")   # modificadores y componentes de combo en $0
+        .when(F.col("menu_price") < 0, "promotion")            # promotions = lines with negative price
+        .when(F.col("menu_price") == 0, "modifier_or_combo")   # modifiers and combo components at $0
         .when(F.col("quantity") == 0, "zero_quantity")
         .otherwise("paid_item"),
     )
