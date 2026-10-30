@@ -1,7 +1,7 @@
 # Databricks notebook source
-# 04_quality_checks: checks de calidad que corren DESPUES del pipeline (tarea 2 del Job).
-# Complementan las expectations del pipeline. Guardan el resultado en dq_results y,
-# si un check critico falla, lanzan un error para que el Job termine en rojo y avise por correo.
+# 04_quality_checks: data quality checks that run AFTER the pipeline (task 2 of the Job).
+# They complement the pipeline expectations. Results are saved to dq_results and,
+# if a critical check fails, an error is raised so the Job ends red and sends an email.
 
 # COMMAND ----------
 dbutils.widgets.text("catalog", "workspace")
@@ -23,59 +23,59 @@ def check(name, dimension, description, sql, rule, critical=True):
     passed = bool(rule(value))
     results.append(Row(run_ts=run_ts, check_name=name, dimension=dimension, description=description,
                        value=str(value), status="PASS" if passed else "FAIL", critical=critical))
-    print(f"{'PASS' if passed else 'FAIL'} | {name} | valor = {value}")
+    print(f"{'PASS' if passed else 'FAIL'} | {name} | value = {value}")
 
 # COMMAND ----------
-# Completitud: ninguna linea sin llave de ticket
-check("ticket_key_not_null", "Completitud", "Lineas sin tienda o numero de ticket",
+# Completeness: no line without a ticket key
+check("ticket_key_not_null", "Completeness", "Lines without store or ticket number",
       f"SELECT COUNT(*) FROM {T('st_silver_ventas')} WHERE store IS NULL OR check_number IS NULL",
       lambda v: v == 0)
 
-# Unicidad: un solo registro por ticket
-check("ticket_id_unique", "Unicidad", "Tickets duplicados en mv_silver_tickets",
+# Uniqueness: a single record per ticket
+check("ticket_id_unique", "Uniqueness", "Duplicate tickets in mv_silver_tickets",
       f"SELECT COUNT(*) - COUNT(DISTINCT ticket_id) FROM {T('mv_silver_tickets')}",
       lambda v: v == 0)
 
-# Unicidad: una tienda y fecha no debe venir de mas de un archivo (mismo CSV subido con otro nombre)
-check("duplicate_store_date_files", "Unicidad", "Combinaciones tienda-fecha cargadas desde mas de un archivo",
+# Uniqueness: a store and date must not come from more than one file (same CSV uploaded under another name)
+check("duplicate_store_date_files", "Uniqueness", "Store-date combinations loaded from more than one file",
       f"""SELECT COUNT(*) FROM (
             SELECT store, sale_date FROM {T('st_silver_ventas')}
             GROUP BY store, sale_date HAVING COUNT(DISTINCT source_file) > 1)""",
       lambda v: v == 0, critical=False)
 
-# Validez: fechas dentro del periodo del dataset
-check("sale_date_in_range", "Validez", "Lineas con fecha fuera de rango",
+# Validity: dates within the dataset period
+check("sale_date_in_range", "Validity", "Lines with date out of range",
       f"SELECT COUNT(*) FROM {T('st_silver_ventas')} WHERE sale_date < DATE'2025-01-01' OR sale_date > current_date()",
       lambda v: v == 0)
 
-# Validez: tipos numericos convertidos
-check("menu_price_numeric", "Validez", "Lineas con precio que no se pudo convertir a numero",
+# Validity: numeric types converted
+check("menu_price_numeric", "Validity", "Lines with a price that could not be converted to a number",
       f"SELECT COUNT(*) FROM {T('st_silver_ventas')} WHERE menu_price IS NULL",
       lambda v: v == 0, critical=False)
 
-# Consistencia: filas descartadas por expectations entre bronze y silver (menos de 0.1%)
-check("bronze_vs_silver_rows", "Consistencia", "% de filas de bronze que no llegaron a silver",
+# Consistency: rows dropped by expectations between bronze and silver (less than 0.1%)
+check("bronze_vs_silver_rows", "Consistency", "% of bronze rows that did not reach silver",
       f"""SELECT ROUND(100 * ((SELECT COUNT(*) FROM {T('st_bronze_ventas')}) - (SELECT COUNT(*) FROM {T('st_silver_ventas')}))
                  / (SELECT COUNT(*) FROM {T('st_bronze_ventas')}), 4)""",
       lambda v: float(v) < 0.1)
 
-# Exactitud: ventas de lineas = ventas de tickets
-check("sales_lines_vs_tickets", "Exactitud", "Diferencia de ventas entre st_silver_ventas y mv_silver_tickets",
+# Accuracy: line sales = ticket sales
+check("sales_lines_vs_tickets", "Accuracy", "Sales difference between st_silver_ventas and mv_silver_tickets",
       f"""SELECT ABS((SELECT SUM(line_amount) FROM {T('st_silver_ventas')}) - (SELECT SUM(net_sales) FROM {T('mv_silver_tickets')}))""",
       lambda v: float(v) < 0.01)
 
-# Exactitud: ventas de tickets con venta = ventas en gold
-check("sales_tickets_vs_gold", "Exactitud", "Diferencia de ventas entre mv_silver_tickets (net_sales > 0) y mv_gold_daily",
+# Accuracy: sales of tickets with sales = sales in gold
+check("sales_tickets_vs_gold", "Accuracy", "Sales difference between mv_silver_tickets (net_sales > 0) and mv_gold_daily",
       f"""SELECT ABS((SELECT SUM(net_sales) FROM {T('mv_silver_tickets')} WHERE net_sales > 0) - (SELECT SUM(net_sales) FROM {T('mv_gold_daily')}))""",
       lambda v: float(v) < 0.01)
 
-# Validez: porcentaje de lineas anuladas (alerta, no detiene)
-check("voided_lines_pct", "Validez", "% de lineas anuladas",
+# Validity: percentage of voided lines (alert, does not stop)
+check("voided_lines_pct", "Validity", "% of voided lines",
       f"SELECT ROUND(100 * AVG(CASE WHEN is_voided THEN 1 ELSE 0 END), 2) FROM {T('st_silver_ventas')}",
       lambda v: float(v) < 5, critical=False)
 
-# Completitud: dias sin datos en el periodo (informativo)
-check("days_without_data", "Completitud", "Dias del periodo sin ninguna venta",
+# Completeness: days without data in the period (informational)
+check("days_without_data", "Completeness", "Days in the period with no sales",
       f"""WITH f AS (SELECT DISTINCT sale_date FROM {T('st_silver_ventas')}),
               cal AS (SELECT explode(sequence((SELECT MIN(sale_date) FROM f), (SELECT MAX(sale_date) FROM f), INTERVAL 1 DAY)) AS d)
           SELECT COUNT(*) FROM cal LEFT ANTI JOIN f ON cal.d = f.sale_date""",
