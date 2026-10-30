@@ -22,8 +22,8 @@ def st_bronze_ventas():
         spark.readStream.format("cloudFiles")
         .option("cloudFiles.format", "csv")
         .option("header", "true")
-        .option("cloudFiles.inferColumnTypes", "false")              # todo como texto; los tipos se corrigen en silver
-        .option("cloudFiles.schemaEvolutionMode", "addNewColumns")   # columnas nuevas (Report Group, Tender Type, Total Rounding)
+        .option("cloudFiles.inferColumnTypes", "false")              
+        .option("cloudFiles.schemaEvolutionMode", "addNewColumns")   
         .load(RAW_PATH)
         .select("*", F.col("_metadata.file_path").alias("source_file"))
     )
