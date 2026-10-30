@@ -1,7 +1,7 @@
--- mv_gold_promo_performance: cada promocion comparada contra las 4 semanas previas y posteriores
--- (mismos dias de la semana, metricas por tienda activa). Comparacion descriptiva, no causal.
+-- mv_gold_promo_performance: each promotion compared against the 4 weeks before and after
+-- (same days of the week, metrics per active store). Descriptive comparison, not causal.
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_promo_performance
-COMMENT 'Cambio en tickets, ventas y ticket promedio por tienda: antes vs durante vs despues de cada promocion.'
+COMMENT 'Change in tickets, sales and average ticket per store: before vs during vs after each promotion.'
 AS
 WITH p AS (
   SELECT *, COALESCE(end_date, date_add(start_date, 13)) AS end_eff FROM ref_promo_calendar

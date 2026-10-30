@@ -1,6 +1,6 @@
--- mv_gold_promo_daily: uso y costo de las lineas de promocion por dia.
+-- mv_gold_promo_daily: usage and cost of promotion lines per day.
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_promo_daily
-COMMENT 'Lineas de promocion (precio negativo) por dia: veces aplicada, tickets, tiendas y monto.'
+COMMENT 'Promotion lines (negative price) per day: times applied, tickets, stores and amount.'
 AS
 SELECT
   sale_date, menu_item, menu_item_ext_ref, pos_code,

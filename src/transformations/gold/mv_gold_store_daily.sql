@@ -1,7 +1,7 @@
--- mv_gold_store_daily: una fila por tienda y dia (solo tickets con venta real).
+-- mv_gold_store_daily: one row per store and day (tickets with real sales only).
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_store_daily
 CLUSTER BY (sale_date, store)
-COMMENT 'Ventas, tickets, promociones y ticket promedio por tienda y dia.'
+COMMENT 'Sales, tickets, promotions and average ticket per store and day.'
 AS
 SELECT
   store,

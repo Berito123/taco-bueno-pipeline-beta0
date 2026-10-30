@@ -1,7 +1,7 @@
--- mv_gold_weekly: una fila por semana. Tendencia de trafico, ticket promedio y uso de promociones.
--- Alimenta las graficas de tendencia del dashboard (antes se calculaba dentro del notebook de EDA).
+-- mv_gold_weekly: one row per week. Traffic trend, average ticket and promotion usage.
+-- Feeds the dashboard trend charts (previously computed inside the EDA notebook).
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_weekly
-COMMENT 'KPIs semanales por tienda activa: tickets, ventas, ticket promedio y % de tickets con promocion.'
+COMMENT 'Weekly KPIs per active store: tickets, sales, average ticket and % of tickets with a promotion.'
 AS
 SELECT
   CAST(date_trunc('WEEK', sale_date) AS DATE) AS week_start,

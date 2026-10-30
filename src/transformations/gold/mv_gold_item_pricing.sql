@@ -1,8 +1,8 @@
--- mv_gold_item_pricing: una fila por producto y mes. Base para analizar precios y elasticidad.
--- Separa el precio de lista (menu_price) del precio realmente pagado (ingreso / unidades),
--- para distinguir subidas de precio de menu vs. reduccion de descuentos.
+-- mv_gold_item_pricing: one row per product and month. Basis for price and elasticity analysis.
+-- Separates the list price (menu_price) from the price actually paid (revenue / units),
+-- to tell menu price increases apart from reduced discounts.
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_item_pricing
-COMMENT 'Precio de lista mediano, precio pagado promedio y unidades por tienda-dia, por producto y mes.'
+COMMENT 'Median list price, average paid price and units per store-day, by product and month.'
 AS
 WITH realized AS (
   SELECT

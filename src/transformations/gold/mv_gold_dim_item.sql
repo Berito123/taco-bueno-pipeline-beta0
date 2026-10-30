@@ -1,6 +1,6 @@
--- mv_gold_dim_item: catalogo de productos (categoria, primera y ultima venta, si se cobra).
+-- mv_gold_dim_item: product catalog (category, first and last sale, whether it is charged for).
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_dim_item
-COMMENT 'Un producto por fila con su categoria mas frecuente y su ciclo de vida.'
+COMMENT 'One product per row with its most frequent category and its life cycle.'
 AS
 WITH rg AS (
   SELECT menu_item, report_group, COUNT(*) AS n,

@@ -1,6 +1,6 @@
--- mv_gold_hourly: una fila por dia de la semana y hora. Dayparts definidos por el equipo.
+-- mv_gold_hourly: one row per day of the week and hour. Dayparts defined by the team.
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_hourly
-COMMENT 'Tickets y ventas promedio por tienda-dia segun dia de la semana y hora.'
+COMMENT 'Average tickets and sales per store-day by day of the week and hour.'
 AS
 WITH t AS (
   SELECT

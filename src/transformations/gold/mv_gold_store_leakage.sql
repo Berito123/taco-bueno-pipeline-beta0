@@ -1,8 +1,8 @@
--- mv_gold_store_leakage: una fila por tienda. Dinero que se pierde por lineas anuladas y articulos regalados
--- (descuento del 100%), comparado contra el promedio de la cadena.
--- Identifica tiendas a revisar; no prueba mal uso (los datos no dicen quien autorizo cada anulacion o descuento).
+-- mv_gold_store_leakage: one row per store. Money lost to voided lines and free items
+-- (100% discount), compared against the chain average.
+-- Flags stores to review; it does not prove misuse (the data does not say who authorized each void or discount).
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_store_leakage
-COMMENT 'Anulaciones y articulos regalados por tienda, % sobre ventas y bandera de tienda atipica.'
+COMMENT 'Voids and free items per store, % of sales and outlier store flag.'
 AS
 WITH s AS (
   SELECT

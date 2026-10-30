@@ -1,5 +1,6 @@
--- mv_gold_daily: one row per day (all stores). Metrics per active store to compare periods.CREATE OR REFRESH MATERIALIZED VIEW mv_gold_daily
-COMMENT 'KPIs diarios de la cadena y por tienda activa.'
+-- mv_gold_daily: one row per day (all stores). Metrics per active store to compare periods.
+CREATE OR REFRESH MATERIALIZED VIEW mv_gold_daily
+COMMENT 'Daily KPIs for the chain and per active store.'
 AS
 SELECT
   sale_date,

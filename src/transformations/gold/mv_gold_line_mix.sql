@@ -1,7 +1,7 @@
--- mv_gold_line_mix: composicion de las lineas del POS por mes y tipo de linea.
--- Muestra que parte de las lineas son ventas cobradas, modificadores/combos, promociones, cantidad cero o anuladas.
+-- mv_gold_line_mix: composition of POS lines by month and line type.
+-- Shows which share of the lines are paid sales, modifiers/combos, promotions, zero quantity or voided.
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_line_mix
-COMMENT 'Lineas y monto por mes y line_type, con su porcentaje dentro del mes.'
+COMMENT 'Lines and amount per month and line_type, with their percentage within the month.'
 AS
 SELECT
   CAST(date_trunc('MONTH', sale_date) AS DATE) AS month,

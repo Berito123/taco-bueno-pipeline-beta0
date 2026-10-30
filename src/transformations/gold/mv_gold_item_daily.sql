@@ -1,7 +1,7 @@
--- mv_gold_item_daily: una fila por producto y dia (solo productos cobrados, sin anulados).
+-- mv_gold_item_daily: one row per product and day (paid items only, no voids).
 CREATE OR REFRESH MATERIALIZED VIEW mv_gold_item_daily
 CLUSTER BY (sale_date, menu_item)
-COMMENT 'Unidades, ingreso y precio promedio realizado por producto y dia.'
+COMMENT 'Units, revenue and average realized price per product and day.'
 AS
 SELECT
   sale_date,

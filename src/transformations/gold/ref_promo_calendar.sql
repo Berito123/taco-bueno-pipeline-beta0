@@ -1,7 +1,7 @@
--- ref_promo_calendar: calendario publico de promociones de Taco Bueno (fuente: anuncios publicos, armado por el equipo).
--- end_date nulo = fecha de fin desconocida (se asumen 14 dias en mv_gold_promo_performance).
+-- ref_promo_calendar: public Taco Bueno promotions calendar (source: public announcements, compiled by the team).
+-- end_date NULL = unknown end date (14 days are assumed in mv_gold_promo_performance).
 CREATE OR REFRESH MATERIALIZED VIEW ref_promo_calendar
-COMMENT 'Calendario de promociones publicas usado para comparar antes, durante y despues.'
+COMMENT 'Public promotions calendar used to compare before, during and after.'
 AS
 SELECT * FROM VALUES
   (1,  '3 for $6',                                DATE'2025-01-22', CAST(NULL AS DATE), 'Value bundle',         '3 FOR|3/6',                                                  'In store', 'Chain'),
