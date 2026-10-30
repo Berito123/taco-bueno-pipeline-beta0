@@ -7,14 +7,14 @@ RAW_PATH = spark.conf.get("raw_path", "/Volumes/workspace/taco_bueno/raw/")
 
 
 def to_snake(c):
-    # "Store #" -> "store", "Menu Item" -> "menu_item"; quita el BOM del primer encabezado
+    # "Store #" -> "store", "Menu Item" -> "menu_item"; removes the BOM from the first header
     c = c.replace("﻿", "").replace("#", "").strip().lower()
     return re.sub(r"[^a-z0-9]+", "_", c).strip("_")
 
 
 @dlt.table(
     name="st_bronze_ventas",
-    comment="Lineas de venta del POS tal como llegan (todo texto), con archivo de origen para trazabilidad.",
+    comment="POS sales lines as they arrive (all text), with source file for traceability.",
     table_properties={"quality": "bronze"},
 )
 def st_bronze_ventas():
